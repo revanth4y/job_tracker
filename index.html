@@ -1,0 +1,2794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KodNest Premium Build System</title>
+  <style>
+    /* ===== TOKENS ===== */
+    :root {
+      --bg-base: #F7F6F3;
+      --text-main: #111111;
+      --accent: #8B0000;
+      --neutral-border: #D2CFC5;
+      --success: #2F6B4F;
+      --warning: #B38B2B;
+      --status-applied: #1E4F7A;
+      --status-rejected: #8B0000;
+      --status-selected: #2F6B4F;
+
+      --space-1: 8px;
+      --space-2: 16px;
+      --space-3: 24px;
+      --space-4: 40px;
+      --space-5: 64px;
+
+      --radius-sm: 4px;
+      --radius-md: 8px;
+
+      --transition-fast: 180ms ease-in-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-base);
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== TOP BAR ===== */
+    .top-bar {
+      height: 64px;
+      border-bottom: 1px solid var(--neutral-border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--space-4);
+      justify-content: space-between;
+    }
+
+    .top-bar__left {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .top-bar__center {
+      font-size: 14px;
+    }
+
+    .top-bar__right .status-badge {
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-border);
+      font-size: 12px;
+    }
+
+    /* ===== ROUTE NAVIGATION ===== */
+    .route-nav {
+      border-bottom: 1px solid var(--neutral-border);
+      padding: 0 var(--space-4);
+      background: var(--bg-base);
+    }
+
+    .route-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .route-nav__toggle {
+      display: none;
+      border: 1px solid var(--neutral-border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .route-nav__toggle-icon {
+      width: 18px;
+      height: 14px;
+      display: inline-flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .route-nav__toggle-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--text-main);
+    }
+
+    .route-nav__list {
+      display: flex;
+      gap: var(--space-3);
+      list-style: none;
+    }
+
+    .route-nav__link {
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-main);
+      border-bottom: 2px solid transparent;
+      padding-bottom: var(--space-1);
+      transition:
+        color var(--transition-fast),
+        border-color var(--transition-fast);
+    }
+
+    .route-nav__link--active {
+      border-bottom-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .route-nav__link:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ===== CONTEXT HEADER ===== */
+    .context-header {
+      padding: var(--space-4) var(--space-4) var(--space-3);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .context-header h1 {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 34px;
+      font-weight: 600;
+      line-height: 1.25;
+      margin-bottom: var(--space-1);
+    }
+
+    .context-header p {
+      max-width: 720px;
+      font-size: 16px;
+    }
+
+    /* ===== MAIN REGION ===== */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 var(--space-4) var(--space-5);
+      display: flex;
+      gap: var(--space-4);
+      flex: 1;
+    }
+
+    .primary {
+      flex: 0 0 70%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .secondary {
+      flex: 0 0 30%;
+    }
+
+    .card {
+      border: 1px solid var(--neutral-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3);
+      background: var(--bg-base);
+    }
+
+    .card h2 {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .card p {
+      max-width: 720px;
+      font-size: 16px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      border: 1px solid var(--neutral-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-1) var(--space-2);
+      font-size: 14px;
+      background: var(--bg-base);
+      transition: border-color var(--transition-fast), background-color var(--transition-fast);
+      resize: vertical;
+    }
+
+    textarea {
+      min-height: 96px;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background-color: var(--bg-base);
+    }
+
+    .helper-text {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      padding: 0 16px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        color var(--transition-fast),
+        border-color var(--transition-fast),
+        opacity var(--transition-fast);
+      background: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-base);
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      background: #6c0000;
+      border-color: #6c0000;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(139, 0, 0, 0.06);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border-color: transparent;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(139, 0, 0, 0.04);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    /* ===== SECONDARY PANEL SPECIFICS ===== */
+    .secondary .card-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .secondary p {
+      font-size: 14px;
+      margin-bottom: var(--space-2);
+    }
+
+    .prompt-box {
+      border: 1px solid var(--neutral-border);
+      border-radius: var(--radius-sm);
+      padding: var(--space-2);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 13px;
+      background: var(--bg-base);
+      white-space: pre-wrap;
+      margin-bottom: var(--space-2);
+    }
+
+    .secondary .actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    /* ===== PROOF FOOTER ===== */
+    .proof-footer {
+      border-top: 1px solid var(--neutral-border);
+      padding: var(--space-2) var(--space-4);
+      background: var(--bg-base);
+    }
+
+    .proof-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: var(--space-3);
+    }
+
+    .proof-label {
+      font-size: 14px;
+      font-weight: 500;
+      min-width: 120px;
+      margin-top: var(--space-1);
+    }
+
+    .proof-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      flex: 1;
+    }
+
+    .proof-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      min-width: 180px;
+    }
+
+    .proof-item-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+    }
+
+    .proof-item input[type="text"] {
+      font-size: 13px;
+    }
+
+    /* ===== FEEDBACK & STATES ===== */
+    .alert {
+      border-radius: var(--radius-md);
+      padding: var(--space-2);
+      border-left: 4px solid var(--neutral-border);
+      background: rgba(17, 17, 17, 0.02);
+      font-size: 14px;
+    }
+
+    .alert-title {
+      font-weight: 500;
+      margin-bottom: var(--space-1);
+    }
+
+    .alert-body {
+      font-size: 14px;
+    }
+
+    .alert--error {
+      border-left-color: var(--warning);
+    }
+
+    .alert--success {
+      border-left-color: var(--success);
+    }
+
+    .empty-state {
+      border-radius: var(--radius-md);
+      border: 1px dashed var(--neutral-border);
+      padding: var(--space-4);
+      text-align: left;
+    }
+
+    .empty-state-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: var(--space-1);
+    }
+
+    .empty-state-description {
+      font-size: 14px;
+      margin-bottom: var(--space-2);
+      max-width: 720px;
+    }
+
+    .empty-state-actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .landing-actions {
+      margin-top: var(--space-3);
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .settings-grid {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-top: var(--space-2);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .slider-row-value {
+      font-size: 14px;
+    }
+
+    /* ===== JOB LIST & FILTERS ===== */
+    .filter-bar {
+      margin-top: var(--space-3);
+      padding: var(--space-2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-border);
+      background: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .filter-field {
+      flex: 1 1 160px;
+    }
+
+    .job-list {
+      margin-top: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .job-card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-border);
+      padding: var(--space-2);
+      background: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .job-card-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-1);
+    }
+
+    .job-card-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .job-card-company {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .job-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-border);
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+
+    .badge--source {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .badge--match {
+      margin-left: var(--space-1);
+    }
+
+    .badge--match-strong {
+      border-color: var(--success);
+      color: var(--success);
+    }
+
+    .badge--match-medium {
+      border-color: var(--warning);
+      color: var(--warning);
+    }
+
+    .badge--match-base {
+      border-color: var(--text-main);
+      color: var(--text-main);
+      opacity: 0.9;
+    }
+
+    .badge--match-low {
+      border-color: var(--neutral-border);
+      color: rgba(17, 17, 17, 0.7);
+    }
+
+    .job-card-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      justify-content: flex-start;
+    }
+
+    .job-card-footer .btn {
+      height: 32px;
+      padding-inline: var(--space-2);
+      font-size: 13px;
+    }
+
+    .job-status-row {
+      margin-top: var(--space-2);
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      align-items: center;
+    }
+
+    .status-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+    }
+
+    .status-pill {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-border);
+      padding: 2px 8px;
+      font-size: 12px;
+      background: transparent;
+      cursor: pointer;
+      transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast);
+    }
+
+    .status-pill--active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .status-badge {
+      font-size: 12px;
+    }
+
+    .status-badge--not-applied {
+      border-color: var(--neutral-border);
+      color: rgba(17, 17, 17, 0.8);
+    }
+
+    .status-badge--applied {
+      border-color: var(--status-applied);
+      color: var(--status-applied);
+    }
+
+    .status-badge--rejected {
+      border-color: var(--status-rejected);
+      color: var(--status-rejected);
+    }
+
+    .status-badge--selected {
+      border-color: var(--status-selected);
+      color: var(--status-selected);
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.2);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+      z-index: 20;
+    }
+
+    .modal-overlay--open {
+      display: flex;
+    }
+
+    .modal {
+      max-width: 720px;
+      width: 100%;
+      background: var(--bg-base);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-border);
+      padding: var(--space-3);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-2);
+    }
+
+    .modal-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .modal-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .modal-description {
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .modal-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-top: var(--space-1);
+    }
+
+    .skill-chip {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--neutral-border);
+      padding: 2px 8px;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: var(--space-4);
+      bottom: var(--space-4);
+      padding: var(--space-2);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-border);
+      background: var(--bg-base);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+      z-index: 30;
+    }
+
+    .toast--visible {
+      opacity: 1;
+    }
+
+    .test-checklist-summary {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: var(--space-1);
+    }
+
+    .test-checklist-warning {
+      font-size: 14px;
+      color: var(--warning);
+      margin-bottom: var(--space-3);
+    }
+
+    .test-checklist-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .test-checklist-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .test-checklist-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .test-checklist-label {
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .test-checklist-tooltip {
+      font-size: 12px;
+      opacity: 0.8;
+      cursor: help;
+      border-bottom: 1px dotted var(--neutral-border);
+    }
+
+    .route-nav__link--locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .ship-locked {
+      border-left: 4px solid var(--warning);
+    }
+
+    /* ===== FINAL PROOF PAGE (/jt/proof) ===== */
+    .proof-page-summary-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+      color: var(--text-main);
+    }
+    .proof-section-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-main);
+      margin-bottom: var(--space-2);
+    }
+    .proof-steps-list {
+      list-style: none;
+      margin-bottom: var(--space-4);
+    }
+    .proof-steps-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-1) 0;
+      font-size: 14px;
+      border-bottom: 1px solid var(--neutral-border);
+    }
+    .proof-steps-list li:last-child { border-bottom: none; }
+    .proof-step-status { font-size: 12px; font-weight: 500; }
+    .proof-step-status--completed { color: var(--success); }
+    .proof-step-status--pending { color: var(--warning); }
+    .proof-artifact-row {
+      margin-bottom: var(--space-2);
+    }
+    .proof-artifact-row label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: var(--space-1);
+    }
+    .proof-artifact-row input {
+      width: 100%;
+      max-width: 480px;
+      padding: var(--space-1) var(--space-2);
+      border: 1px solid var(--neutral-border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+    }
+    .proof-artifact-row input.invalid { border-color: var(--warning); }
+    .proof-copy-section { margin-top: var(--space-4); }
+    .proof-status-badge-wrap { margin-bottom: var(--space-3); }
+    .proof-status-badge {
+      display: inline-block;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--neutral-border);
+    }
+    .proof-status-badge--not-started { background: rgba(17,17,17,0.06); }
+    .proof-status-badge--in-progress { background: rgba(179,139,43,0.12); border-color: var(--warning); }
+    .proof-status-badge--shipped { background: rgba(47,107,79,0.12); border-color: var(--success); color: var(--success); }
+    .ship-success-message {
+      font-size: 15px;
+      color: var(--success);
+      margin-top: var(--space-2);
+    }
+
+    .digest-item {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--neutral-border);
+      padding: var(--space-2);
+      background: var(--bg-base);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .digest-item-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-1);
+    }
+
+    .digest-item-title {
+      font-family: "Georgia", "Times New Roman", serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .digest-item-meta {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .status-updates-empty {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 960px) {
+      .main {
+        flex-direction: column;
+      }
+
+      .primary,
+      .secondary {
+        flex: 1 1 auto;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .route-nav-inner {
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .route-nav__toggle {
+        display: inline-flex;
+      }
+
+      .route-nav__list {
+        position: relative;
+        flex-direction: column;
+        gap: var(--space-1);
+        padding: var(--space-2) 0 var(--space-2);
+        display: none;
+      }
+
+      .route-nav--open .route-nav__list {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- TOP BAR -->
+    <header class="top-bar">
+      <div class="top-bar__left">KodNest Premium Build System</div>
+      <div class="top-bar__center">Step 1 of 4</div>
+      <div class="top-bar__right">
+        <span class="status-badge">Not Started</span>
+      </div>
+    </header>
+
+    <!-- ROUTE NAVIGATION -->
+    <nav class="route-nav" aria-label="Job Notification Tracker navigation">
+      <div class="route-nav-inner">
+        <button
+          class="route-nav__toggle"
+          type="button"
+          aria-label="Toggle navigation"
+          aria-expanded="false"
+        >
+          <span class="route-nav__toggle-icon" aria-hidden="true">
+            <span class="route-nav__toggle-bar"></span>
+            <span class="route-nav__toggle-bar"></span>
+            <span class="route-nav__toggle-bar"></span>
+          </span>
+        </button>
+        <ul class="route-nav__list">
+          <li><button class="route-nav__link" type="button" data-route="/dashboard">Dashboard</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/saved">Saved</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/digest">Digest</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/settings">Settings</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/proof">Proof</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/jt/proof">Final Proof</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/jt/07-test">Test</button></li>
+          <li><button class="route-nav__link" type="button" data-route="/jt/08-ship" id="nav-ship">Ship</button></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTEXT HEADER -->
+    <section class="context-header">
+      <h1 id="route-title">Stop Missing The Right Jobs.</h1>
+      <p id="route-subtitle">Precision-matched job discovery delivered daily at 9AM.</p>
+    </section>
+
+    <!-- MAIN REGION -->
+    <main class="main">
+      <!-- PRIMARY WORKSPACE (70%) -->
+      <section class="primary" id="primary-root">
+      </section>
+
+      <!-- SECONDARY PANEL (30%) -->
+      <aside class="secondary">
+        <div class="card">
+          <div class="card-title">Step guidance</div>
+          <p>Use this step to align the team on what “shipped” means. Keep it short and repeatable.</p>
+
+          <div class="prompt-box">
+Define the workflow in one paragraph:
+- What user outcome?
+- Which environments?
+- Any constraints?
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-secondary">Copy</button>
+            <button class="btn btn-secondary">Build in Lovable</button>
+            <button class="btn btn-ghost">It Worked</button>
+            <button class="btn btn-ghost">Error</button>
+            <button class="btn btn-ghost">Add Screenshot</button>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- JOB DETAIL MODAL -->
+    <div id="job-modal" class="modal-overlay" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <div>
+            <div id="modal-title" class="modal-title">Job title</div>
+            <div id="modal-subtitle" class="modal-subtitle">Company • Location</div>
+          </div>
+          <button type="button" class="btn btn-ghost modal-close">Close</button>
+        </div>
+        <div class="modal-body">
+          <div id="modal-description" class="modal-description"></div>
+          <div id="modal-skills" class="modal-skills"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+
+    <!-- PROOF FOOTER -->
+    <footer class="proof-footer">
+      <div class="proof-inner">
+        <div class="proof-label">Proof checklist</div>
+        <div class="proof-items">
+          <div class="proof-item">
+            <div class="proof-item-row">
+              <input type="checkbox" id="ui-built" />
+              <label for="ui-built">UI Built</label>
+            </div>
+            <input type="text" placeholder="Link to UI or screenshot" />
+          </div>
+
+          <div class="proof-item">
+            <div class="proof-item-row">
+              <input type="checkbox" id="logic-working" />
+              <label for="logic-working">Logic Working</label>
+            </div>
+            <input type="text" placeholder="Explain how you verified logic" />
+          </div>
+
+          <div class="proof-item">
+            <div class="proof-item-row">
+              <input type="checkbox" id="test-passed" />
+              <label for="test-passed">Test Passed</label>
+            </div>
+            <input type="text" placeholder="Link to run or report" />
+          </div>
+
+          <div class="proof-item">
+            <div class="proof-item-row">
+              <input type="checkbox" id="deployed" />
+              <label for="deployed">Deployed</label>
+            </div>
+            <input type="text" placeholder="Environment URL or change reference" />
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      const JOB_TEMPLATES = [
+        {
+          title: "SDE Intern",
+          company: "Amazon",
+          location: "Bengaluru, Karnataka",
+          mode: "Hybrid",
+          experience: "Fresher",
+          skills: ["Java", "Data Structures", "Algorithms"],
+          source: "LinkedIn",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://www.amazon.jobs/en/jobs/example-sde-intern",
+          description:
+            "Work with a small team on customer-facing services.\nContribute to code reviews and internal tools.\nLearn how large-scale distributed systems are designed and monitored.\nMentored by an SDE-II with weekly learning sessions."
+        },
+        {
+          title: "Graduate Engineer Trainee",
+          company: "TCS",
+          location: "Chennai, Tamil Nadu",
+          mode: "Onsite",
+          experience: "0-1",
+          skills: ["Java", "Spring Boot", "SQL"],
+          source: "Naukri",
+          salaryRange: "3–5 LPA",
+          applyUrl: "https://www.tcs.com/careers/graduate-engineer-trainee",
+          description:
+            "Join a cross-functional team delivering enterprise applications.\nParticipate in requirement walkthroughs and sprint ceremonies.\nWork on backend services under guidance of senior engineers.\nTraining provided on TCS internal tooling and processes."
+        },
+        {
+          title: "Frontend Intern",
+          company: "Flipkart",
+          location: "Bengaluru, Karnataka",
+          mode: "Hybrid",
+          experience: "Fresher",
+          skills: ["JavaScript", "React", "CSS"],
+          source: "LinkedIn",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://www.flipkartcareers.com/frontend-intern",
+          description:
+            "Work on UI components used by millions of customers.\nImplement responsive layouts based on design specs.\nCollaborate with design and product to refine interactions.\nExposure to performance optimization and accessibility basics."
+        },
+        {
+          title: "Junior Backend Developer",
+          company: "Zoho",
+          location: "Chennai, Tamil Nadu",
+          mode: "Onsite",
+          experience: "1-3",
+          skills: ["Java", "REST APIs", "MySQL"],
+          source: "Indeed",
+          salaryRange: "6–10 LPA",
+          applyUrl: "https://careers.zoho.com/backend-developer-junior",
+          description:
+            "Build and maintain backend services for SaaS products.\nWrite clean, maintainable code with unit tests.\nParticipate in design discussions and code reviews.\nWork closely with support teams to debug production issues."
+        },
+        {
+          title: "QA Intern",
+          company: "Freshworks",
+          location: "Chennai, Tamil Nadu",
+          mode: "Hybrid",
+          experience: "Fresher",
+          skills: ["Manual Testing", "API Testing", "Postman"],
+          source: "Naukri",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://www.freshworks.com/careers/qa-intern",
+          description:
+            "Support the QA team in functional and regression testing.\nCreate and maintain detailed test cases.\nLog clear and reproducible bugs in the tracking system.\nLearn basic automation and API testing practices."
+        },
+        {
+          title: "Data Analyst Intern",
+          company: "Swiggy",
+          location: "Bengaluru, Karnataka",
+          mode: "Remote",
+          experience: "Fresher",
+          skills: ["SQL", "Excel", "Python"],
+          source: "LinkedIn",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://careers.swiggy.com/data-analyst-intern",
+          description:
+            "Work with operations and product teams to answer data questions.\nPrepare daily and weekly reports on key metrics.\nBuild simple dashboards to track experiment outcomes.\nLearn how data is used to improve customer experience."
+        },
+        {
+          title: "Java Developer (0-1)",
+          company: "Infosys",
+          location: "Pune, Maharashtra",
+          mode: "Hybrid",
+          experience: "0-1",
+          skills: ["Java", "Spring", "REST"],
+          source: "Naukri",
+          salaryRange: "3–5 LPA",
+          applyUrl: "https://www.infosys.com/careers/java-developer-junior",
+          description:
+            "Implement change requests in existing Java services.\nPair with senior developers to understand domain flows.\nFollow secure coding and logging guidelines.\nWork within an agile team with regular feedback cycles."
+        },
+        {
+          title: "Python Developer (Fresher)",
+          company: "Capgemini",
+          location: "Hyderabad, Telangana",
+          mode: "Onsite",
+          experience: "Fresher",
+          skills: ["Python", "Django", "REST APIs"],
+          source: "Indeed",
+          salaryRange: "3–5 LPA",
+          applyUrl: "https://www.capgemini.com/careers/python-fresher-role",
+          description:
+            "Contribute to internal tools built in Python and Django.\nWrite simple APIs and background jobs.\nParticipate in peer reviews and knowledge-sharing sessions.\nTraining provided on cloud deployment basics."
+        },
+        {
+          title: "React Developer (1-3)",
+          company: "Razorpay",
+          location: "Bengaluru, Karnataka",
+          mode: "Hybrid",
+          experience: "1-3",
+          skills: ["React", "TypeScript", "Redux"],
+          source: "LinkedIn",
+          salaryRange: "10–18 LPA",
+          applyUrl: "https://razorpay.com/careers/react-developer",
+          description:
+            "Develop dashboards used by merchants to track payments.\nWork with design on implementing reusable UI patterns.\nOptimize components for performance on low-end devices.\nCollaborate with backend teams on API contracts."
+        },
+        {
+          title: "SDE Intern",
+          company: "CRED",
+          location: "Bengaluru, Karnataka",
+          mode: "Remote",
+          experience: "Fresher",
+          skills: ["Go", "Microservices", "Kubernetes"],
+          source: "LinkedIn",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://careers.cred.club/sde-intern",
+          description:
+            "Help ship features in a high-scale fintech environment.\nWork closely with mentors on production code.\nGain exposure to observability tools and on-call practices.\nExpected to be curious, detail-oriented, and hands-on."
+        },
+        {
+          title: "Junior Backend Developer",
+          company: "Juspay",
+          location: "Bengaluru, Karnataka",
+          mode: "Hybrid",
+          experience: "1-3",
+          skills: ["Java", "PostgreSQL", "Microservices"],
+          source: "Naukri",
+          salaryRange: "6–10 LPA",
+          applyUrl: "https://juspay.in/careers/junior-backend-developer",
+          description:
+            "Build payment APIs with strict reliability requirements.\nWork with product on integrating new payment methods.\nParticipate in incident reviews and root-cause analysis.\nStrong focus on code quality and correctness."
+        },
+        {
+          title: "Frontend Intern",
+          company: "PixelStack Labs",
+          location: "Remote, India",
+          mode: "Remote",
+          experience: "Fresher",
+          skills: ["React", "Tailwind CSS", "TypeScript"],
+          source: "Indeed",
+          salaryRange: "₹15k–₹40k/month Internship",
+          applyUrl: "https://careers.pixelstacklabs.com/frontend-intern",
+          description:
+            "Join a small team building marketing dashboards for startups.\nWork directly with lead engineers on component design.\nLearn how to structure React projects for long-term maintenance.\nGood communication and ownership are valued."
+        }
+      ];
+
+      const JOBS = Array.from({ length: 60 }, (_, index) => {
+        const base = JOB_TEMPLATES[index % JOB_TEMPLATES.length];
+        return {
+          ...base,
+          id: `job-${index + 1}`,
+          postedDaysAgo: index % 11
+        };
+      });
+
+      const routes = {
+        "/": {
+          title: "Stop Missing The Right Jobs.",
+          subtitle: "Precision-matched job discovery delivered daily at 9AM.",
+          primary: `
+            <article class="card">
+              <h2>Stop Missing The Right Jobs.</h2>
+              <p>Precision-matched job discovery delivered daily at 9AM.</p>
+              <div class="landing-actions">
+                <button class="btn btn-primary" type="button" data-route="/settings">
+                  Start Tracking
+                </button>
+              </div>
+            </article>
+          `
+        },
+        "/dashboard": {
+          title: "Dashboard",
+          subtitle: "Browse realistic roles filtered by your current view.",
+          primary: `
+            <article class="card">
+              <h2>Job dashboard</h2>
+              <p>These roles are sample data only. Matching logic uses your saved preferences.</p>
+              <div id="prefs-banner" class="alert alert--error" style="display: none;">
+                <div class="alert-title">Matching inactive.</div>
+                <div class="alert-body">Set your preferences to activate intelligent matching.</div>
+              </div>
+              <div class="field-group" style="margin-top: var(--space-2);">
+                <label>
+                  <input type="checkbox" id="filter-only-matches" />
+                  Show only jobs above my threshold
+                </label>
+              </div>
+              <div class="filter-bar" id="filter-bar">
+                <div class="filter-row">
+                  <div class="field-group filter-field">
+                    <label for="filter-keyword">Search</label>
+                    <input id="filter-keyword" type="text" placeholder="Title or company" />
+                  </div>
+                  <div class="field-group filter-field">
+                    <label for="filter-location">Location</label>
+                    <select id="filter-location">
+                      <option value="">All locations</option>
+                      <option value="Bengaluru">Bengaluru</option>
+                      <option value="Chennai">Chennai</option>
+                      <option value="Hyderabad">Hyderabad</option>
+                      <option value="Pune">Pune</option>
+                      <option value="Remote">Remote</option>
+                    </select>
+                  </div>
+                  <div class="field-group filter-field">
+                    <label for="filter-mode">Mode</label>
+                    <select id="filter-mode">
+                      <option value="">Any</option>
+                      <option value="Remote">Remote</option>
+                      <option value="Hybrid">Hybrid</option>
+                      <option value="Onsite">Onsite</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="filter-row">
+                  <div class="field-group filter-field">
+                    <label for="filter-experience">Experience</label>
+                    <select id="filter-experience">
+                      <option value="">Any</option>
+                      <option value="Fresher">Fresher</option>
+                      <option value="0-1">0-1</option>
+                      <option value="1-3">1-3</option>
+                      <option value="3-5">3-5</option>
+                    </select>
+                  </div>
+                  <div class="field-group filter-field">
+                    <label for="filter-source">Source</label>
+                    <select id="filter-source">
+                      <option value="">All</option>
+                      <option value="LinkedIn">LinkedIn</option>
+                      <option value="Naukri">Naukri</option>
+                      <option value="Indeed">Indeed</option>
+                    </select>
+                  </div>
+                  <div class="field-group filter-field">
+                    <label for="filter-status">Status</label>
+                    <select id="filter-status">
+                      <option value="">All</option>
+                      <option value="Not Applied">Not Applied</option>
+                      <option value="Applied">Applied</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="Selected">Selected</option>
+                    </select>
+                  </div>
+                  <div class="field-group filter-field">
+                    <label for="filter-sort">Sort</label>
+                    <select id="filter-sort">
+                      <option value="latest">Latest first</option>
+                      <option value="match">Match score</option>
+                      <option value="salary">Salary (high to low)</option>
+                      <option value="oldest">Oldest first</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div id="job-list" class="job-list"></div>
+            </article>
+          `
+        },
+        "/settings": {
+          title: "Notification Settings",
+          subtitle: "Define the preferences Job Notification Tracker should use.",
+          primary: `
+            <article class="card">
+              <h2>Notification settings</h2>
+              <p>These preferences drive match scores on your dashboard. You can adjust them at any time.</p>
+              <div class="settings-grid">
+                <div class="field-group">
+                  <label for="pref-role-keywords">Role keywords</label>
+                  <input id="pref-role-keywords" type="text" placeholder="e.g. SDE Intern, Frontend, Data Analyst" />
+                  <div class="helper-text">Comma-separated list used to match job titles and descriptions.</div>
+                </div>
+
+                <div class="field-group">
+                  <label for="pref-locations">Preferred locations</label>
+                  <select id="pref-locations" multiple>
+                    <option value="Bengaluru">Bengaluru</option>
+                    <option value="Chennai">Chennai</option>
+                    <option value="Hyderabad">Hyderabad</option>
+                    <option value="Pune">Pune</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Gurgaon">Gurgaon</option>
+                    <option value="Noida">Noida</option>
+                    <option value="Remote">Remote</option>
+                  </select>
+                  <div class="helper-text">Hold Ctrl or Cmd to select multiple locations.</div>
+                </div>
+
+                <div class="field-group">
+                  <label>Preferred mode</label>
+                  <div class="job-meta">
+                    <label><input type="checkbox" id="pref-mode-remote" value="Remote" /> Remote</label>
+                    <label><input type="checkbox" id="pref-mode-hybrid" value="Hybrid" /> Hybrid</label>
+                    <label><input type="checkbox" id="pref-mode-onsite" value="Onsite" /> Onsite</label>
+                  </div>
+                  <div class="helper-text">You can keep more than one mode active.</div>
+                </div>
+
+                <div class="field-group">
+                  <label for="pref-experience">Experience level</label>
+                  <select id="pref-experience">
+                    <option value="">Any</option>
+                    <option value="Fresher">Fresher</option>
+                    <option value="0-1">0-1</option>
+                    <option value="1-3">1-3</option>
+                    <option value="3-5">3-5</option>
+                  </select>
+                  <div class="helper-text">Pick the band that best matches where you are today.</div>
+                </div>
+
+                <div class="field-group">
+                  <label for="pref-skills">Skills</label>
+                  <input id="pref-skills" type="text" placeholder="e.g. React, Java, SQL, Python" />
+                  <div class="helper-text">Comma-separated list used to match job skills.</div>
+                </div>
+
+                <div class="field-group">
+                  <label for="pref-min-score">Minimum match score</label>
+                  <div class="slider-row">
+                    <input id="pref-min-score" type="range" min="0" max="100" step="5" value="40" />
+                    <div class="slider-row-value">
+                      <span id="pref-min-score-value">40</span>%
+                    </div>
+                  </div>
+                  <div class="helper-text">Jobs below this score are hidden when you enable the threshold toggle.</div>
+                </div>
+
+                <div style="margin-top: var(--space-3); display: flex; gap: var(--space-2);">
+                  <button type="button" class="btn btn-primary" id="pref-save">Save preferences</button>
+                </div>
+              </div>
+            </article>
+          `
+        },
+        "/saved": {
+          title: "Saved Jobs",
+          subtitle: "Roles you save from the dashboard will show here.",
+          primary: `
+            <article class="card">
+              <h2>Saved jobs</h2>
+              <p>Use this space to review roles you want to follow up on.</p>
+              <div id="saved-empty" class="empty-state">
+                <div class="empty-state-title">No saved jobs yet.</div>
+                <div class="empty-state-description">
+                  As you start saving promising roles from the dashboard, they will appear here.
+                </div>
+              </div>
+              <div id="saved-list" class="job-list"></div>
+            </article>
+          `
+        },
+        "/digest": {
+          title: "Daily Digest",
+          subtitle: "Review your 9AM job digest based on current preferences.",
+          primary: `
+            <article class="card">
+              <h2>Top 10 Jobs For You — 9AM Digest</h2>
+              <p id="digest-date">Today</p>
+              <div id="digest-blocking" class="alert alert--error" style="margin-top: var(--space-2); display: none;">
+                <div class="alert-title">Preferences needed.</div>
+                <div class="alert-body">Set preferences to generate a personalized digest.</div>
+              </div>
+              <div style="margin-top: var(--space-3); display: flex; gap: var(--space-2); flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" id="digest-generate">
+                  Generate Today's 9AM Digest (Simulated)
+                </button>
+                <button type="button" class="btn btn-secondary" id="digest-copy">
+                  Copy Digest to Clipboard
+                </button>
+                <button type="button" class="btn btn-secondary" id="digest-email">
+                  Create Email Draft
+                </button>
+              </div>
+              <div id="digest-empty" class="empty-state" style="margin-top: var(--space-3); display: none;">
+                <div class="empty-state-title">No matching roles today.</div>
+                <div class="empty-state-description">
+                  Check again tomorrow or adjust your preferences to widen the search.
+                </div>
+              </div>
+              <div id="digest-list" class="job-list" style="margin-top: var(--space-3);"></div>
+              <div style="margin-top: var(--space-3);">
+                <div class="digest-item-title">Recent Status Updates</div>
+                <div id="digest-status-list" class="job-list"></div>
+              </div>
+              <p class="helper-text" style="margin-top: var(--space-2);">
+                This digest was generated based on your preferences. Demo Mode: Daily 9AM trigger simulated manually.
+              </p>
+            </article>
+          `
+        },
+        "/proof": {
+          title: "Proof",
+          subtitle: "Use this space to collect artifacts for this build.",
+          primary: `
+            <article class="card">
+              <h2>Proof of tracking</h2>
+              <p>This is a placeholder for screenshots, links, and notes you will add later.</p>
+            </article>
+          `
+        },
+        "/jt/proof": {
+          title: "Final Proof",
+          subtitle: "Project 1 — Job Notification Tracker.",
+          primary: `
+            <article class="card">
+              <h2 class="proof-page-summary-title">Project 1 — Job Notification Tracker</h2>
+              <div class="proof-status-badge-wrap">
+                <span id="proof-status-badge" class="proof-status-badge"></span>
+              </div>
+              <h3 class="proof-section-title">A) Step Completion Summary</h3>
+              <ul id="proof-steps-list" class="proof-steps-list"></ul>
+              <h3 class="proof-section-title">B) Artifact Collection Inputs</h3>
+              <div class="proof-artifact-row">
+                <label for="proof-lovable">Lovable Project Link</label>
+                <input type="text" id="proof-lovable" placeholder="https://..." />
+              </div>
+              <div class="proof-artifact-row">
+                <label for="proof-github">GitHub Repository Link</label>
+                <input type="text" id="proof-github" placeholder="https://github.com/..." />
+              </div>
+              <div class="proof-artifact-row">
+                <label for="proof-deployed">Deployed URL (Vercel or equivalent)</label>
+                <input type="text" id="proof-deployed" placeholder="https://..." />
+              </div>
+              <div class="proof-copy-section">
+                <button type="button" class="btn btn-primary" id="proof-copy-submission">Copy Final Submission</button>
+              </div>
+            </article>
+          `
+        },
+        "/jt/07-test": {
+          title: "Test Checklist",
+          subtitle: "Verify all items before shipping.",
+          primary: `
+            <article class="card">
+              <h2>Built-in test checklist</h2>
+              <p id="test-summary" class="test-checklist-summary">Tests Passed: 0 / 10</p>
+              <p id="test-warning" class="test-checklist-warning" style="display: none;">Resolve all issues before shipping.</p>
+              <div style="margin-top: var(--space-2);">
+                <button type="button" class="btn btn-ghost" id="test-reset">Reset Test Status</button>
+              </div>
+              <ul id="test-checklist-list" class="test-checklist-list" style="margin-top: var(--space-3); list-style: none;"></ul>
+            </article>
+          `
+        },
+        "/jt/08-ship": {
+          title: "Ship",
+          subtitle: "Locked until all tests pass and proof links are provided.",
+          primary: `
+            <article class="card" id="ship-card">
+              <h2>Ship</h2>
+              <p id="ship-message"></p>
+              <div id="ship-actions" style="margin-top: var(--space-2);"></div>
+              <p id="ship-success-msg" class="ship-success-message" style="display: none;"></p>
+            </article>
+          `
+        }
+      };
+
+      const nav = document.querySelector(".route-nav");
+      const navLinks = Array.from(document.querySelectorAll(".route-nav__link"));
+      const toggleButton = document.querySelector(".route-nav__toggle");
+      const titleEl = document.getElementById("route-title");
+      const subtitleEl = document.getElementById("route-subtitle");
+      const primaryRoot = document.getElementById("primary-root");
+      const modalOverlay = document.getElementById("job-modal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalSubtitle = document.getElementById("modal-subtitle");
+      const modalDescription = document.getElementById("modal-description");
+      const modalSkills = document.getElementById("modal-skills");
+      const modalCloseBtn = document.querySelector(".modal-close");
+
+      const PREFERENCES_KEY = "jobTrackerPreferences";
+      const DEFAULT_MIN_MATCH_SCORE = 40;
+      const DIGEST_KEY_PREFIX = "jobTrackerDigest_";
+      const STATUS_KEY = "jobTrackerStatus";
+      const STATUS_HISTORY_KEY = "jobTrackerStatusHistory";
+      const MAX_STATUS_HISTORY = 30;
+      const TEST_CHECKLIST_KEY = "jobTrackerTestChecklist";
+      const TEST_CHECKLIST_ITEMS = [
+        { label: "Preferences persist after refresh", tooltip: "Save on Settings, refresh, confirm form is prefilled." },
+        { label: "Match score calculates correctly", tooltip: "Set preferences, open Dashboard, confirm job cards show match %." },
+        { label: "\"Show only matches\" toggle works", tooltip: "Enable toggle on Dashboard, confirm list filters by threshold." },
+        { label: "Save job persists after refresh", tooltip: "Save a job, refresh, open Saved, confirm it appears." },
+        { label: "Apply opens in new tab", tooltip: "Click Apply on a job, confirm new tab opens." },
+        { label: "Status update persists after refresh", tooltip: "Change status on a card, refresh, confirm status remains." },
+        { label: "Status filter works correctly", tooltip: "Set status filter to e.g. Applied, confirm only Applied jobs show." },
+        { label: "Digest generates top 10 by score", tooltip: "Generate digest, confirm up to 10 jobs by match score." },
+        { label: "Digest persists for the day", tooltip: "Generate digest, refresh, open Digest, confirm same list." },
+        { label: "No console errors on main pages", tooltip: "Open Dashboard, Settings, Saved, Digest, Proof; check console is clear." }
+      ];
+
+      const PROOF_LINKS_KEY = "jobTrackerProofLinks";
+      const SHIPPED_KEY = "jobTrackerProject1Shipped";
+      const URL_REGEX = /^https?:\/\/[^\s]+$/i;
+
+      function isValidUrl(s) {
+        if (!s || typeof s !== "string") return false;
+        const t = s.trim();
+        return t.length > 0 && URL_REGEX.test(t);
+      }
+
+      function loadProofLinks() {
+        try {
+          const raw = localStorage.getItem(PROOF_LINKS_KEY);
+          if (!raw) return { lovable: "", github: "", deployed: "" };
+          const o = JSON.parse(raw);
+          return {
+            lovable: o.lovable || "",
+            github: o.github || "",
+            deployed: o.deployed || ""
+          };
+        } catch {
+          return { lovable: "", github: "", deployed: "" };
+        }
+      }
+
+      function saveProofLinks(links) {
+        localStorage.setItem(PROOF_LINKS_KEY, JSON.stringify(links));
+      }
+
+      function loadShipped() {
+        try {
+          return localStorage.getItem(SHIPPED_KEY) === "true";
+        } catch {
+          return false;
+        }
+      }
+
+      function setShipped(value) {
+        if (value && !canShip()) return;
+        localStorage.setItem(SHIPPED_KEY, value ? "true" : "false");
+      }
+
+      function hasAllProofLinks() {
+        const links = loadProofLinks();
+        return isValidUrl(links.lovable) && isValidUrl(links.github) && isValidUrl(links.deployed);
+      }
+
+      function canShip() {
+        return hasAllProofLinks() && allTestsPassed();
+      }
+
+      function getProofStepStatus() {
+        const prefs = loadPreferences();
+        const hasPrefs = !!prefs && (prefs.roleKeywords || (prefs.preferredLocations && prefs.preferredLocations.length) || prefs.minMatchScore != null);
+        const savedIds = getSavedIds();
+        const digestKey = getTodayKey();
+        const hasDigest = !!localStorage.getItem(digestKey);
+        const links = loadProofLinks();
+        const testsOk = allTestsPassed();
+        const shipped = loadShipped();
+        return [
+          { label: "Preferences configured", completed: hasPrefs },
+          { label: "Dashboard & match scoring", completed: true },
+          { label: "Saved jobs", completed: savedIds.length > 0 },
+          { label: "Digest", completed: hasDigest },
+          { label: "Settings", completed: true },
+          { label: "Proof artifacts (Lovable, GitHub, Deployed URL)", completed: hasAllProofLinks() },
+          { label: "Test checklist (10/10)", completed: testsOk },
+          { label: "Shipped", completed: shipped }
+        ];
+      }
+
+      function getProjectStatusBadge() {
+        if (loadShipped()) return { status: "Shipped", class: "proof-status-badge--shipped" };
+        const links = loadProofLinks();
+        const hasAny = links.lovable || links.github || links.deployed || loadTestChecklist().some(Boolean);
+        if (hasAny) return { status: "In Progress", class: "proof-status-badge--in-progress" };
+        return { status: "Not Started", class: "proof-status-badge--not-started" };
+      }
+
+      function getDefaultPreferences() {
+        return {
+          roleKeywords: "",
+          preferredLocations: [],
+          preferredMode: [],
+          experienceLevel: "",
+          skills: "",
+          minMatchScore: DEFAULT_MIN_MATCH_SCORE
+        };
+      }
+
+      function loadPreferences() {
+        try {
+          const raw = localStorage.getItem(PREFERENCES_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          return {
+            ...getDefaultPreferences(),
+            ...parsed,
+            preferredLocations: Array.isArray(parsed.preferredLocations) ? parsed.preferredLocations : [],
+            preferredMode: Array.isArray(parsed.preferredMode) ? parsed.preferredMode : []
+          };
+        } catch {
+          return null;
+        }
+      }
+
+      function savePreferences(prefs) {
+        localStorage.setItem(PREFERENCES_KEY, JSON.stringify(prefs));
+      }
+
+      let currentPreferences = loadPreferences();
+      let hasStoredPreferences = !!currentPreferences;
+      if (!currentPreferences) {
+        currentPreferences = getDefaultPreferences();
+      }
+
+      function applyPreferencesToForm(prefs) {
+        const roleInput = document.getElementById("pref-role-keywords");
+        if (!roleInput) return;
+        roleInput.value = prefs.roleKeywords || "";
+
+        const locationsSelect = document.getElementById("pref-locations");
+        if (locationsSelect) {
+          Array.from(locationsSelect.options).forEach((opt) => {
+            opt.selected = (prefs.preferredLocations || []).includes(opt.value);
+          });
+        }
+
+        const remote = document.getElementById("pref-mode-remote");
+        const hybrid = document.getElementById("pref-mode-hybrid");
+        const onsite = document.getElementById("pref-mode-onsite");
+        const modes = prefs.preferredMode || [];
+        if (remote) remote.checked = modes.includes("Remote");
+        if (hybrid) hybrid.checked = modes.includes("Hybrid");
+        if (onsite) onsite.checked = modes.includes("Onsite");
+
+        const expSelect = document.getElementById("pref-experience");
+        if (expSelect) {
+          expSelect.value = prefs.experienceLevel || "";
+        }
+
+        const skillsInput = document.getElementById("pref-skills");
+        if (skillsInput) {
+          skillsInput.value = prefs.skills || "";
+        }
+
+        const slider = document.getElementById("pref-min-score");
+        const sliderValue = document.getElementById("pref-min-score-value");
+        const sliderVal = prefs.minMatchScore ?? DEFAULT_MIN_MATCH_SCORE;
+        if (slider) {
+          slider.value = String(sliderVal);
+        }
+        if (sliderValue) {
+          sliderValue.textContent = String(sliderVal);
+        }
+      }
+
+      function readPreferencesFromForm() {
+        const roleInput = document.getElementById("pref-role-keywords");
+        const locationsSelect = document.getElementById("pref-locations");
+        const expSelect = document.getElementById("pref-experience");
+        const skillsInput = document.getElementById("pref-skills");
+        const slider = document.getElementById("pref-min-score");
+
+        const preferredLocations = locationsSelect
+          ? Array.from(locationsSelect.selectedOptions).map((opt) => opt.value)
+          : [];
+
+        const preferredMode = [];
+        const remote = document.getElementById("pref-mode-remote");
+        const hybrid = document.getElementById("pref-mode-hybrid");
+        const onsite = document.getElementById("pref-mode-onsite");
+        if (remote && remote.checked) preferredMode.push(remote.value);
+        if (hybrid && hybrid.checked) preferredMode.push(hybrid.value);
+        if (onsite && onsite.checked) preferredMode.push(onsite.value);
+
+        return {
+          roleKeywords: roleInput ? roleInput.value.trim() : "",
+          preferredLocations,
+          preferredMode,
+          experienceLevel: expSelect ? expSelect.value : "",
+          skills: skillsInput ? skillsInput.value.trim() : "",
+          minMatchScore: slider ? Number(slider.value) || DEFAULT_MIN_MATCH_SCORE : DEFAULT_MIN_MATCH_SCORE
+        };
+      }
+
+      let settingsInitialized = false;
+      let digestInitialized = false;
+      let currentDigestJobs = [];
+      let currentDigestDateLabel = "";
+      let jobStatusMap = loadStatusMap();
+      let statusHistory = loadStatusHistory();
+
+      function initSettingsRoute() {
+        applyPreferencesToForm(currentPreferences);
+        if (settingsInitialized) return;
+        settingsInitialized = true;
+
+        const slider = document.getElementById("pref-min-score");
+        const sliderValue = document.getElementById("pref-min-score-value");
+        if (slider && sliderValue) {
+          slider.addEventListener("input", () => {
+            sliderValue.textContent = slider.value;
+          });
+        }
+
+        const saveBtn = document.getElementById("pref-save");
+        if (saveBtn) {
+          saveBtn.addEventListener("click", () => {
+            currentPreferences = readPreferencesFromForm();
+            hasStoredPreferences = true;
+            savePreferences(currentPreferences);
+          });
+        }
+      }
+
+      function loadStatusMap() {
+        try {
+          const raw = localStorage.getItem(STATUS_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch {
+          return {};
+        }
+      }
+
+      function saveStatusMap(map) {
+        localStorage.setItem(STATUS_KEY, JSON.stringify(map));
+      }
+
+      function getJobStatus(jobId) {
+        return jobStatusMap[jobId] || "Not Applied";
+      }
+
+      function setJobStatus(jobId, status) {
+        jobStatusMap = {
+          ...jobStatusMap,
+          [jobId]: status
+        };
+        saveStatusMap(jobStatusMap);
+      }
+
+      function getSavedIds() {
+        try {
+          const raw = localStorage.getItem("jobTracker.savedIds");
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function setSavedIds(ids) {
+        localStorage.setItem("jobTracker.savedIds", JSON.stringify(ids));
+      }
+
+      function isSaved(id, savedIds) {
+        return savedIds.includes(id);
+      }
+
+      function formatPostedDays(days) {
+        if (days === 0) return "Today";
+        if (days === 1) return "1 day ago";
+        return `${days} days ago`;
+      }
+
+      function splitToList(value) {
+        return (value || "")
+          .split(",")
+          .map((part) => part.trim().toLowerCase())
+          .filter(Boolean);
+      }
+
+      function computeMatchScore(job, prefs) {
+        if (!prefs) return 0;
+
+        let score = 0;
+
+        const roleKeywords = splitToList(prefs.roleKeywords);
+        const userSkills = splitToList(prefs.skills);
+        const preferredLocations = (prefs.preferredLocations || []).map((loc) => loc.toLowerCase());
+        const preferredMode = prefs.preferredMode || [];
+        const experienceLevel = (prefs.experienceLevel || "").trim();
+
+        const titleLower = job.title.toLowerCase();
+        const descriptionLower = job.description.toLowerCase();
+
+        if (roleKeywords.length > 0 && roleKeywords.some((kw) => titleLower.includes(kw))) {
+          score += 25;
+        }
+
+        if (roleKeywords.length > 0 && roleKeywords.some((kw) => descriptionLower.includes(kw))) {
+          score += 15;
+        }
+
+        if (preferredLocations.length > 0) {
+          const jobLocationLower = job.location.toLowerCase();
+          if (preferredLocations.some((loc) => jobLocationLower.includes(loc))) {
+            score += 15;
+          }
+        }
+
+        if (Array.isArray(preferredMode) && preferredMode.length > 0) {
+          if (preferredMode.includes(job.mode)) {
+            score += 10;
+          }
+        }
+
+        if (experienceLevel && job.experience === experienceLevel) {
+          score += 10;
+        }
+
+        if (userSkills.length > 0) {
+          const jobSkillsLower = (job.skills || []).map((s) => s.toLowerCase());
+          if (userSkills.some((skill) => jobSkillsLower.includes(skill))) {
+            score += 15;
+          }
+        }
+
+        if (job.postedDaysAgo <= 2) {
+          score += 5;
+        }
+
+        if (job.source === "LinkedIn") {
+          score += 5;
+        }
+
+        return Math.min(score, 100);
+      }
+
+      function getMatchBadgeClass(score) {
+        if (score >= 80) return "badge--match badge--match-strong";
+        if (score >= 60) return "badge--match badge--match-medium";
+        if (score >= 40) return "badge--match badge--match-base";
+        return "badge--match badge--match-low";
+      }
+
+      function extractSalaryValue(range) {
+        const match = (range || "").match(/\d+/);
+        if (!match) return 0;
+        return parseInt(match[0], 10) || 0;
+      }
+
+      function loadStatusHistory() {
+        try {
+          const raw = localStorage.getItem(STATUS_HISTORY_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveStatusHistory(history) {
+        localStorage.setItem(STATUS_HISTORY_KEY, JSON.stringify(history));
+      }
+
+      function loadTestChecklist() {
+        try {
+          const raw = localStorage.getItem(TEST_CHECKLIST_KEY);
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) && arr.length === 10 ? arr : Array(10).fill(false);
+        } catch {
+          return Array(10).fill(false);
+        }
+      }
+
+      function saveTestChecklist(arr) {
+        const out = arr.length >= 10 ? arr.slice(0, 10) : [...arr, ...Array(10 - arr.length).fill(false)];
+        localStorage.setItem(TEST_CHECKLIST_KEY, JSON.stringify(out));
+      }
+
+      function allTestsPassed() {
+        const arr = loadTestChecklist();
+        return arr.length >= 10 && arr.every(Boolean);
+      }
+
+      function updateShipLock() {
+        const shipBtn = document.getElementById("nav-ship");
+        if (!shipBtn) return;
+        if (canShip() || loadShipped()) {
+          shipBtn.classList.remove("route-nav__link--locked");
+          shipBtn.removeAttribute("aria-disabled");
+        } else {
+          shipBtn.classList.add("route-nav__link--locked");
+          shipBtn.setAttribute("aria-disabled", "true");
+        }
+      }
+
+      function getTodayKey() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, "0");
+        const dd = String(now.getDate()).padStart(2, "0");
+        return `${DIGEST_KEY_PREFIX}${yyyy}-${mm}-${dd}`;
+      }
+
+      function loadDigestForToday() {
+        try {
+          const raw = localStorage.getItem(getTodayKey());
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      }
+
+      function saveDigestForToday(digest) {
+        localStorage.setItem(getTodayKey(), JSON.stringify(digest));
+      }
+
+      function getStatusBadgeClass(status) {
+        const value = (status || "Not Applied").toLowerCase();
+        if (value === "applied") return "status-badge status-badge--applied";
+        if (value === "rejected") return "status-badge status-badge--rejected";
+        if (value === "selected") return "status-badge status-badge--selected";
+        return "status-badge status-badge--not-applied";
+      }
+
+      function renderStatusGroup(jobId, status) {
+        const currentStatus = status || getJobStatus(jobId);
+        const badgeClass = getStatusBadgeClass(currentStatus);
+        const statuses = ["Not Applied", "Applied", "Rejected", "Selected"];
+        const pills = statuses
+          .map((value) => {
+            const activeClass = value === currentStatus ? " status-pill--active" : "";
+            return `<button type="button" class="status-pill${activeClass}" data-status-value="${value}">${value}</button>`;
+          })
+          .join("");
+
+        return `
+          <div class="job-status-row" data-status-group>
+            <div class="badge ${badgeClass}">${currentStatus}</div>
+            <div class="status-group">
+              ${pills}
+            </div>
+          </div>
+        `;
+      }
+
+      function createJobCard(job, savedIds) {
+        const saved = isSaved(job.id, savedIds);
+        const score = typeof job.matchScore === "number" ? job.matchScore : 0;
+        const matchClass = getMatchBadgeClass(score);
+        const status = job.status || getJobStatus(job.id);
+        return `
+          <article class="job-card" data-job-id="${job.id}">
+            <header class="job-card-header">
+              <div>
+                <div class="job-card-title">${job.title}</div>
+                <div class="job-card-company">${job.company}</div>
+              </div>
+              <div style="display: flex; gap: var(--space-1); align-items: center;">
+                <div class="badge badge--source">${job.source}</div>
+                <div class="badge ${matchClass}">${score}% match</div>
+              </div>
+            </header>
+            <div class="job-meta">
+              <span>${job.location}</span>
+              <span>• ${job.mode}</span>
+              <span>• ${job.experience}</span>
+              <span>• ${job.salaryRange}</span>
+              <span>• ${formatPostedDays(job.postedDaysAgo)}</span>
+            </div>
+            ${renderStatusGroup(job.id, status)}
+            <footer class="job-card-footer">
+              <button type="button" class="btn btn-secondary" data-action="view">View</button>
+              <button type="button" class="btn btn-secondary" data-action="save">
+                ${saved ? "Saved" : "Save"}
+              </button>
+              <button type="button" class="btn btn-primary" data-action="apply">Apply</button>
+            </footer>
+          </article>
+        `;
+      }
+
+      function openModal(job) {
+        modalTitle.textContent = job.title;
+        modalSubtitle.textContent = `${job.company} • ${job.location} • ${job.mode}`;
+        modalDescription.textContent = job.description;
+        modalSkills.innerHTML = job.skills
+          .map((skill) => `<span class="skill-chip">${skill}</span>`)
+          .join("");
+        modalOverlay.classList.add("modal-overlay--open");
+        modalOverlay.setAttribute("aria-hidden", "false");
+      }
+
+      function closeModal() {
+        modalOverlay.classList.remove("modal-overlay--open");
+        modalOverlay.setAttribute("aria-hidden", "true");
+      }
+
+      function setActiveLink(path) {
+        navLinks.forEach((link) => {
+          const linkPath = link.getAttribute("data-route");
+          if (linkPath === path) {
+            link.classList.add("route-nav__link--active");
+          } else {
+            link.classList.remove("route-nav__link--active");
+          }
+        });
+      }
+
+      function getFilters() {
+        const keywordEl = document.getElementById("filter-keyword");
+        if (!keywordEl) return null;
+
+        return {
+          keyword: keywordEl.value.trim().toLowerCase(),
+          location: (document.getElementById("filter-location").value || "").toLowerCase(),
+          mode: document.getElementById("filter-mode").value,
+          experience: document.getElementById("filter-experience").value,
+          source: document.getElementById("filter-source").value,
+          status: document.getElementById("filter-status")
+            ? document.getElementById("filter-status").value
+            : "",
+          sort: document.getElementById("filter-sort").value || "latest"
+        };
+      }
+
+      function applyFilters(jobs, filters, prefs, onlyMatches) {
+        let result = jobs.slice();
+
+        if (onlyMatches && prefs) {
+          const threshold = prefs.minMatchScore ?? DEFAULT_MIN_MATCH_SCORE;
+          result = result.filter((job) => (job.matchScore || 0) >= threshold);
+        }
+
+        if (filters.keyword) {
+          result = result.filter((job) => {
+            const target = `${job.title} ${job.company}`.toLowerCase();
+            return target.includes(filters.keyword);
+          });
+        }
+
+        if (filters.location) {
+          result = result.filter((job) => job.location.toLowerCase().includes(filters.location));
+        }
+
+        if (filters.mode) {
+          result = result.filter((job) => job.mode === filters.mode);
+        }
+
+        if (filters.experience) {
+          result = result.filter((job) => job.experience === filters.experience);
+        }
+
+        if (filters.source) {
+          result = result.filter((job) => job.source === filters.source);
+        }
+
+        if (filters.status) {
+          result = result.filter((job) => (job.status || getJobStatus(job.id)) === filters.status);
+        }
+
+        result.sort((a, b) => {
+          if (filters.sort === "oldest") {
+            return b.postedDaysAgo - a.postedDaysAgo;
+          }
+          if (filters.sort === "match") {
+            return (b.matchScore || 0) - (a.matchScore || 0);
+          }
+          if (filters.sort === "salary") {
+            return extractSalaryValue(b.salaryRange) - extractSalaryValue(a.salaryRange);
+          }
+          // latest
+          return a.postedDaysAgo - b.postedDaysAgo;
+        });
+
+        return result;
+      }
+
+      function renderDashboard() {
+        const jobList = document.getElementById("job-list");
+        if (!jobList) return;
+
+        const filters = getFilters();
+        const prefs = currentPreferences;
+        const savedIds = getSavedIds();
+        const banner = document.getElementById("prefs-banner");
+        const onlyMatchesToggle = document.getElementById("filter-only-matches");
+        const onlyMatches = onlyMatchesToggle ? onlyMatchesToggle.checked : false;
+
+        if (banner) {
+          banner.style.display = hasStoredPreferences ? "none" : "block";
+        }
+
+        const jobsWithScores = JOBS.map((job) => ({
+          ...job,
+          matchScore: computeMatchScore(job, prefs),
+          status: getJobStatus(job.id)
+        }));
+
+        const filteredJobs = filters
+          ? applyFilters(jobsWithScores, filters, prefs, onlyMatches)
+          : jobsWithScores;
+
+        if (filteredJobs.length === 0) {
+          jobList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-title">No roles match your criteria.</div>
+              <div class="empty-state-description">
+                Adjust filters or lower your threshold to see more roles.
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        jobList.innerHTML = filteredJobs.map((job) => createJobCard(job, savedIds)).join("");
+      }
+
+      function renderSavedJobs() {
+        const list = document.getElementById("saved-list");
+        const empty = document.getElementById("saved-empty");
+        if (!list || !empty) return;
+
+        const savedIds = getSavedIds();
+        const jobs = JOBS.filter((job) => savedIds.includes(job.id));
+
+        if (jobs.length === 0) {
+          empty.style.display = "block";
+          list.innerHTML = "";
+          return;
+        }
+
+        empty.style.display = "none";
+        const cards = jobs
+          .map((job) => {
+            const jobWithScore = {
+              ...job,
+              matchScore: computeMatchScore(job, currentPreferences),
+              status: getJobStatus(job.id)
+            };
+            const savedIds = getSavedIds();
+            return createJobCard(jobWithScore, savedIds);
+          })
+          .join("");
+
+        list.innerHTML = cards;
+      }
+
+      function buildDigestJobs() {
+        const prefs = currentPreferences;
+        const threshold = prefs.minMatchScore ?? DEFAULT_MIN_MATCH_SCORE;
+        const jobsWithScores = JOBS.map((job) => ({
+          ...job,
+          matchScore: computeMatchScore(job, prefs)
+        }));
+
+        const eligible = jobsWithScores.filter((job) => job.matchScore >= threshold);
+
+        eligible.sort((a, b) => {
+          if (b.matchScore !== a.matchScore) {
+            return b.matchScore - a.matchScore;
+          }
+          return a.postedDaysAgo - b.postedDaysAgo;
+        });
+
+        return eligible.slice(0, 10);
+      }
+
+      function renderDigest(digest) {
+        const listEl = document.getElementById("digest-list");
+        const emptyEl = document.getElementById("digest-empty");
+        const dateEl = document.getElementById("digest-date");
+        if (!listEl || !emptyEl || !dateEl) return;
+
+        currentDigestJobs = digest.jobs || [];
+        currentDigestDateLabel = digest.dateLabel || "";
+
+        dateEl.textContent = digest.dateLabel || "Today";
+
+        if (currentDigestJobs.length === 0) {
+          emptyEl.style.display = "block";
+          listEl.innerHTML = "";
+          return;
+        }
+
+        emptyEl.style.display = "none";
+        const items = currentDigestJobs
+          .map(
+            (job) => `
+            <article class="digest-item">
+              <div class="digest-item-header">
+                <div>
+                  <div class="digest-item-title">${job.title}</div>
+                  <div class="digest-item-meta">${job.company} • ${job.location}</div>
+                </div>
+                <div class="badge ${getMatchBadgeClass(job.matchScore)}">${job.matchScore}% match</div>
+              </div>
+              <div class="digest-item-meta">
+                ${job.experience} • Apply via digest
+              </div>
+              <div class="job-card-footer">
+                <button type="button" class="btn btn-primary" data-digest-action="apply" data-job-id="${job.id}">
+                  Apply
+                </button>
+              </div>
+            </article>
+          `
+          )
+          .join("");
+
+        listEl.innerHTML = items;
+      }
+
+      function formatDigestPlain(jobs, dateLabel) {
+        const lines = [];
+        lines.push("Top 10 Jobs For You — 9AM Digest");
+        lines.push(dateLabel);
+        lines.push("");
+
+        jobs.forEach((job, index) => {
+          lines.push(
+            `${index + 1}. ${job.title} — ${job.company} — ${job.location} — ${job.experience} — Match ${
+              job.matchScore
+            }%`
+          );
+          lines.push(`   Apply: ${job.applyUrl}`);
+        });
+
+        lines.push("");
+        lines.push("This digest was generated based on your preferences.");
+        lines.push("Demo Mode: Daily 9AM trigger simulated manually.");
+
+        return lines.join("\n");
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add("toast--visible");
+        window.clearTimeout(showToast._timeoutId);
+        showToast._timeoutId = window.setTimeout(() => {
+          toast.classList.remove("toast--visible");
+        }, 2500);
+      }
+
+      function recordStatusChange(job, status) {
+        const entry = {
+          jobId: job.id,
+          title: job.title,
+          company: job.company,
+          status,
+          changedAt: new Date().toISOString()
+        };
+        statusHistory.unshift(entry);
+        if (statusHistory.length > MAX_STATUS_HISTORY) {
+          statusHistory.length = MAX_STATUS_HISTORY;
+        }
+        saveStatusHistory(statusHistory);
+      }
+
+      function handleDigestGenerate() {
+        const blockingEl = document.getElementById("digest-blocking");
+        if (!hasStoredPreferences) {
+          if (blockingEl) blockingEl.style.display = "block";
+          return;
+        }
+
+        const existing = loadDigestForToday();
+        if (existing && Array.isArray(existing.jobs) && existing.jobs.length > 0) {
+          renderDigest(existing);
+          return;
+        }
+
+        const jobs = buildDigestJobs();
+        const dateLabel = new Date().toLocaleDateString("en-IN", {
+          year: "numeric",
+          month: "short",
+          day: "numeric"
+        });
+
+        if (jobs.length === 0) {
+          renderDigest({ dateLabel, jobs: [] });
+          return;
+        }
+
+        const digest = {
+          dateLabel,
+          jobs: jobs.map((job) => ({
+            id: job.id,
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            experience: job.experience,
+            matchScore: job.matchScore,
+            applyUrl: job.applyUrl
+          }))
+        };
+
+        saveDigestForToday(digest);
+        renderDigest(digest);
+      }
+
+      function handleDigestCopy() {
+        if (!currentDigestJobs.length) return;
+        const dateLabel =
+          currentDigestDateLabel ||
+          new Date().toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          });
+        const text = formatDigestPlain(currentDigestJobs, dateLabel);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).catch(() => {});
+        }
+      }
+
+      function handleDigestEmail() {
+        if (!currentDigestJobs.length) return;
+        const dateLabel =
+          currentDigestDateLabel ||
+          new Date().toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          });
+        const body = formatDigestPlain(currentDigestJobs, dateLabel);
+        const subject = "My 9AM Job Digest";
+        const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        window.location.href = mailto;
+      }
+
+      function initDigestRoute() {
+        const blockingEl = document.getElementById("digest-blocking");
+        const generateBtn = document.getElementById("digest-generate");
+        const copyBtn = document.getElementById("digest-copy");
+        const emailBtn = document.getElementById("digest-email");
+
+        if (!generateBtn || !copyBtn || !emailBtn) return;
+
+        if (!hasStoredPreferences) {
+          if (blockingEl) blockingEl.style.display = "block";
+          generateBtn.disabled = true;
+          copyBtn.disabled = true;
+          emailBtn.disabled = true;
+          return;
+        }
+
+        if (blockingEl) blockingEl.style.display = "none";
+        generateBtn.disabled = false;
+        copyBtn.disabled = false;
+        emailBtn.disabled = false;
+
+        if (!digestInitialized) {
+          digestInitialized = true;
+          generateBtn.addEventListener("click", handleDigestGenerate);
+          copyBtn.addEventListener("click", handleDigestCopy);
+          emailBtn.addEventListener("click", handleDigestEmail);
+
+          const listEl = document.getElementById("digest-list");
+          if (listEl) {
+            listEl.addEventListener("click", (event) => {
+              const btn = event.target.closest("[data-digest-action]");
+              if (!btn) return;
+              const action = btn.getAttribute("data-digest-action");
+              const jobId = btn.getAttribute("data-job-id");
+              const job = currentDigestJobs.find((j) => j.id === jobId);
+              if (!job) return;
+              if (action === "apply") {
+                window.open(job.applyUrl, "_blank", "noopener");
+              }
+            });
+          }
+        }
+
+        const existing = loadDigestForToday();
+        if (existing && Array.isArray(existing.jobs) && existing.jobs.length > 0) {
+          renderDigest(existing);
+        }
+
+        const statusList = document.getElementById("digest-status-list");
+        if (statusList) {
+          if (!statusHistory.length) {
+            statusList.innerHTML = '<div class="status-updates-empty">No recent status updates yet.</div>';
+          } else {
+            const items = statusHistory
+              .slice(0, 5)
+              .map((entry) => {
+                const date = new Date(entry.changedAt).toLocaleString("en-IN", {
+                  month: "short",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit"
+                });
+                return `
+                  <div class="digest-item-meta">
+                    <strong>${entry.title}</strong> at ${entry.company} — ${entry.status} (${date})
+                  </div>
+                `;
+              })
+              .join("");
+            statusList.innerHTML = items;
+          }
+        }
+      }
+
+      function initTestRoute() {
+        const listEl = document.getElementById("test-checklist-list");
+        const summaryEl = document.getElementById("test-summary");
+        const warningEl = document.getElementById("test-warning");
+        const resetBtn = document.getElementById("test-reset");
+        if (!listEl || !summaryEl || !warningEl) return;
+
+        let state = loadTestChecklist();
+
+        function updateSummary() {
+          const boxes = listEl.querySelectorAll("input[data-test-index]");
+          let passed = 0;
+          boxes.forEach((input) => { if (input.checked) passed++; });
+          summaryEl.textContent = "Tests Passed: " + passed + " / 10";
+          warningEl.style.display = passed < 10 ? "block" : "none";
+          updateShipLock();
+        }
+
+        listEl.innerHTML = TEST_CHECKLIST_ITEMS.map(
+          (item, i) => `
+          <li class="test-checklist-item">
+            <input type="checkbox" id="test-cb-${i}" data-test-index="${i}" ${state[i] ? "checked" : ""} />
+            <label class="test-checklist-label" for="test-cb-${i}">${item.label}</label>
+            <span class="test-checklist-tooltip" title="${item.tooltip}">How to test</span>
+          </li>
+        `
+        ).join("");
+
+        listEl.addEventListener("change", (e) => {
+          const cb = e.target.closest("input[data-test-index]");
+          if (!cb) return;
+          const idx = parseInt(cb.getAttribute("data-test-index"), 10);
+          if (idx >= 0 && idx < 10) {
+            state[idx] = cb.checked;
+            saveTestChecklist(state);
+            updateSummary();
+          }
+        });
+
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            state = Array(10).fill(false);
+            saveTestChecklist(state);
+            listEl.querySelectorAll("input[data-test-index]").forEach((cb, i) => {
+              cb.checked = state[i];
+            });
+            updateSummary();
+          });
+        }
+
+        updateSummary();
+      }
+
+      function initProofRoute() {
+        const stepsList = document.getElementById("proof-steps-list");
+        const statusBadge = document.getElementById("proof-status-badge");
+        const lovableInput = document.getElementById("proof-lovable");
+        const githubInput = document.getElementById("proof-github");
+        const deployedInput = document.getElementById("proof-deployed");
+        const copyBtn = document.getElementById("proof-copy-submission");
+        if (!stepsList || !statusBadge) return;
+
+        let links = loadProofLinks();
+        lovableInput.value = links.lovable;
+        githubInput.value = links.github;
+        deployedInput.value = links.deployed;
+
+        function validateAndSave(input, key) {
+          const v = (input.value || "").trim();
+          const valid = !v || isValidUrl(v);
+          input.classList.toggle("invalid", !!v && !valid);
+          if (valid) {
+            links[key] = v;
+            saveProofLinks(links);
+            renderSteps();
+            renderBadge();
+          }
+        }
+
+        [lovableInput, githubInput, deployedInput].forEach((el, i) => {
+          const keys = ["lovable", "github", "deployed"];
+          el.addEventListener("blur", () => validateAndSave(el, keys[i]));
+          el.addEventListener("input", () => validateAndSave(el, keys[i]));
+        });
+
+        function renderSteps() {
+          const steps = getProofStepStatus();
+          stepsList.innerHTML = steps.map((s) => `
+            <li>
+              <span>${s.label}</span>
+              <span class="proof-step-status ${s.completed ? "proof-step-status--completed" : "proof-step-status--pending"}">${s.completed ? "Completed" : "Pending"}</span>
+            </li>
+          `).join("");
+        }
+
+        function renderBadge() {
+          const b = getProjectStatusBadge();
+          statusBadge.textContent = b.status;
+          statusBadge.className = "proof-status-badge " + b.class;
+        }
+
+        if (copyBtn) {
+          copyBtn.addEventListener("click", () => {
+            links = loadProofLinks();
+            const text = `------------------------------------------
+Job Notification Tracker — Final Submission
+
+Lovable Project:
+${links.lovable || "(not set)"}
+
+GitHub Repository:
+${links.github || "(not set)"}
+
+Live Deployment:
+${links.deployed || "(not set)"}
+
+Core Features:
+- Intelligent match scoring
+- Daily digest simulation
+- Status tracking
+- Test checklist enforced
+------------------------------------------`;
+            navigator.clipboard.writeText(text).then(() => {
+              showToast("Final submission copied to clipboard.");
+            }).catch(() => showToast("Could not copy."));
+          });
+        }
+
+        renderSteps();
+        renderBadge();
+      }
+
+      function initShipRoute() {
+        const card = document.getElementById("ship-card");
+        const message = document.getElementById("ship-message");
+        const actionsEl = document.getElementById("ship-actions");
+        const successMsg = document.getElementById("ship-success-msg");
+        if (!card || !message) return;
+
+        const shipped = loadShipped();
+        if (shipped) {
+          card.classList.remove("ship-locked");
+          message.textContent = "Project 1 is shipped.";
+          if (successMsg) {
+            successMsg.style.display = "block";
+            successMsg.textContent = "Project 1 Shipped Successfully.";
+          }
+          if (actionsEl) actionsEl.innerHTML = "";
+          return;
+        }
+
+        if (canShip()) {
+          card.classList.remove("ship-locked");
+          message.textContent = "All tests passed and proof links provided. You can mark as shipped.";
+          if (actionsEl) {
+            actionsEl.innerHTML = "<button type=\"button\" class=\"btn btn-primary\" id=\"ship-mark-btn\">Mark as Shipped</button>";
+            const markBtn = document.getElementById("ship-mark-btn");
+            if (markBtn) {
+              markBtn.addEventListener("click", () => {
+                setShipped(true);
+                initShipRoute();
+                updateShipLock();
+              });
+            }
+          }
+          if (successMsg) successMsg.style.display = "none";
+        } else {
+          card.classList.add("ship-locked");
+          if (!hasAllProofLinks()) {
+            message.textContent = "Provide all three proof links (Final Proof page) and complete the test checklist.";
+          } else {
+            message.textContent = "Complete all test checklist items first.";
+          }
+          if (actionsEl) actionsEl.innerHTML = "";
+          if (successMsg) successMsg.style.display = "none";
+        }
+      }
+
+      function renderRoute(path) {
+        const route = routes[path] || routes["/"];
+        titleEl.textContent = route.title;
+        subtitleEl.textContent = route.subtitle;
+        primaryRoot.innerHTML = route.primary.trim();
+        setActiveLink(path);
+
+        if (path === "/dashboard") {
+          renderDashboard();
+          const filterBar = document.getElementById("filter-bar");
+          if (filterBar) {
+            filterBar.addEventListener("input", renderDashboard);
+            filterBar.addEventListener("change", renderDashboard);
+          }
+          const onlyMatchesToggle = document.getElementById("filter-only-matches");
+          if (onlyMatchesToggle) {
+            onlyMatchesToggle.addEventListener("change", renderDashboard);
+          }
+          const jobList = document.getElementById("job-list");
+          if (jobList) {
+            jobList.addEventListener("click", handleJobListClick);
+          }
+        } else if (path === "/settings") {
+          initSettingsRoute();
+        } else if (path === "/saved") {
+          renderSavedJobs();
+          const savedList = document.getElementById("saved-list");
+          if (savedList) {
+            savedList.addEventListener("click", handleSavedListClick);
+          }
+        } else if (path === "/digest") {
+          initDigestRoute();
+        } else if (path === "/jt/proof") {
+          initProofRoute();
+        } else if (path === "/jt/07-test") {
+          initTestRoute();
+        } else if (path === "/jt/08-ship") {
+          initShipRoute();
+        }
+        updateShipLock();
+      }
+
+      function handleNavClick(event) {
+        const button = event.target.closest(".route-nav__link");
+        if (!button) return;
+        const path = button.getAttribute("data-route");
+        if (path === "/jt/08-ship" && !canShip()) {
+          if (!hasAllProofLinks()) showToast("Provide all three proof links on Final Proof page first.");
+          else showToast("Complete all test checklist items first.");
+          return;
+        }
+        renderRoute(path);
+      }
+
+      function handlePrimaryClick(event) {
+        const button = event.target.closest("[data-route]");
+        if (!button) return;
+        const path = button.getAttribute("data-route");
+        if (!path) return;
+        renderRoute(path);
+      }
+
+      function handleToggleClick() {
+        const isOpen = nav.classList.toggle("route-nav--open");
+        toggleButton.setAttribute("aria-expanded", String(isOpen));
+      }
+
+      function handleJobListClick(event) {
+        const statusButton = event.target.closest("[data-status-value]");
+        if (statusButton) {
+          const card = statusButton.closest(".job-card");
+          if (!card) return;
+          const jobId = card.getAttribute("data-job-id");
+          const job = JOBS.find((j) => j.id === jobId);
+          if (!job) return;
+
+          const newStatus = statusButton.getAttribute("data-status-value");
+          setJobStatus(jobId, newStatus);
+          recordStatusChange(job, newStatus);
+          if (newStatus !== "Not Applied") {
+            showToast(`Status updated: ${newStatus}`);
+          }
+          renderDashboard();
+          return;
+        }
+
+        const actionButton = event.target.closest("[data-action]");
+        if (!actionButton) return;
+        const card = actionButton.closest(".job-card");
+        if (!card) return;
+        const jobId = card.getAttribute("data-job-id");
+        const job = JOBS.find((j) => j.id === jobId);
+        if (!job) return;
+
+        const action = actionButton.getAttribute("data-action");
+        if (action === "view") {
+          openModal(job);
+        } else if (action === "save") {
+          const savedIds = getSavedIds();
+          if (!savedIds.includes(job.id)) {
+            savedIds.push(job.id);
+            setSavedIds(savedIds);
+            actionButton.textContent = "Saved";
+          }
+        } else if (action === "apply") {
+          window.open(job.applyUrl, "_blank", "noopener");
+        }
+      }
+
+      function handleSavedListClick(event) {
+        const statusButton = event.target.closest("[data-status-value]");
+        if (statusButton) {
+          const card = statusButton.closest(".job-card");
+          if (!card) return;
+          const jobId = card.getAttribute("data-job-id");
+          const job = JOBS.find((j) => j.id === jobId);
+          if (!job) return;
+
+          const newStatus = statusButton.getAttribute("data-status-value");
+          setJobStatus(jobId, newStatus);
+          recordStatusChange(job, newStatus);
+          if (newStatus !== "Not Applied") {
+            showToast(`Status updated: ${newStatus}`);
+          }
+          renderSavedJobs();
+          return;
+        }
+
+        const actionButton = event.target.closest("[data-action]");
+        if (!actionButton) return;
+        const card = actionButton.closest(".job-card");
+        if (!card) return;
+        const jobId = card.getAttribute("data-job-id");
+        const job = JOBS.find((j) => j.id === jobId);
+        if (!job) return;
+
+        const action = actionButton.getAttribute("data-action");
+        if (action === "view") {
+          openModal(job);
+        } else if (action === "apply") {
+          window.open(job.applyUrl, "_blank", "noopener");
+        }
+      }
+
+      nav.addEventListener("click", handleNavClick);
+      primaryRoot.addEventListener("click", handlePrimaryClick);
+      toggleButton.addEventListener("click", handleToggleClick);
+
+      modalOverlay.addEventListener("click", (event) => {
+        if (event.target === modalOverlay) {
+          closeModal();
+        }
+      });
+      modalCloseBtn.addEventListener("click", closeModal);
+
+      // Initial render: landing route
+      renderRoute("/");
+    })();
+  </script>
+</body>
+</html>
